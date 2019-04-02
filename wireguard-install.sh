@@ -50,7 +50,7 @@ if [ ! -f "$WG_CONFIG" ]; then
     GATEWAY_ADDRESS="${PRIVATE_SUBNET::-4}1"
 
     if [ "$SERVER_HOST" == "" ]; then
-        SERVER_HOST=$(ip addr | grep 'inet' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1)
+        SERVER_HOST=$(curl ifconfig.me)
         if [ "$INTERACTIVE" == "yes" ]; then
             read -p "Servers public IP address is $SERVER_HOST. Is that correct? [y/n]: " -e -i "y" CONFIRM
             if [ "$CONFIRM" == "n" ]; then
@@ -61,7 +61,7 @@ if [ ! -f "$WG_CONFIG" ]; then
     fi
 
     if [ "$SERVER_PORT" == "" ]; then
-        SERVER_PORT=$( get_free_udp_port )
+        SERVER_PORT=51820
     fi
 
     if [ "$CLIENT_DNS" == "" ]; then
@@ -124,6 +124,7 @@ AllowedIPs = $CLIENT_ADDRESS/32" >> $WG_CONFIG
 PrivateKey = $CLIENT_PRIVKEY
 Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
 DNS = $CLIENT_DNS
+MTU = 1320
 [Peer]
 PublicKey = $SERVER_PUBKEY
 AllowedIPs = 0.0.0.0/0, ::/0
@@ -183,9 +184,10 @@ AllowedIPs = $CLIENT_ADDRESS/32" >> $WG_CONFIG
 PrivateKey = $CLIENT_PRIVKEY
 Address = $CLIENT_ADDRESS/$PRIVATE_SUBNET_MASK
 DNS = $CLIENT_DNS
+MTU = 1320
 [Peer]
 PublicKey = $SERVER_PUBKEY
-AllowedIPs = 0.0.0.0/0, ::/0 
+AllowedIPs = 0.0.0.0/0, ::/0
 Endpoint = $SERVER_ENDPOINT
 PersistentKeepalive = 25" > $HOME/$CLIENT_NAME-wg0.conf
 qrencode -t ansiutf8 -l L < $HOME/$CLIENT_NAME-wg0.conf
